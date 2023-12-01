@@ -15,21 +15,17 @@ class Pizza(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    address = db.Column(db.String(255), nullable=False)
-    pizzas = db.relationship('Restaurant', secondary='restaurant_pizza', backref='Pizza')
+    ingredients = db.Column(db.String(255), nullable=False)
+    restaurants = db.relationship('Restaurant', secondary='restaurant_pizza', backref='Pizza')
 
 class RestaurantPizza(db.Model):
-    tablename__ = 'Restaurant'
+    __tablename__ = 'restaurant_pizza'
 
     id = db.Column(db.Integer, primary_key=True)
-    restaurant_id = db.Column(db.Integer, db.ForeignKey(Restaurant.id), nullable=False)
-    pizza_id = db.Column(db.Integer, db.ForeignKey(Pizza.id), nullable=False)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('Restaurant.id'), nullable=False)
+    pizza_id = db.Column(db.Integer, db.ForeignKey('Pizza.id'), nullable=False)
     price = db.Column(db.Float, nullable=False)
 
-# Validating the code
-def validate_price(self, price):
-    return 1 <= price <= 30
-
-
-
-# add any models you may need. 
+    @staticmethod
+    def validate_price(price):
+        return 1 <= price <= 30
