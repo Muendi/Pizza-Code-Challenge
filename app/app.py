@@ -32,6 +32,29 @@ def get_restaurants():
     ]
     return jsonify(formatted_restaurants)
 
+# Route to get a specific restaurant by ID
+@app.route('/restaurants/<int:id>', methods=['GET'])
+def get_restaurant(id):
+    restaurant = Restaurant.query.get(id)
+    if restaurant:
+        pizzas = [
+            {
+                "id": pizza.id,
+                "name": pizza.name,
+                "ingredients": pizza.ingredients
+            }
+            for pizza in restaurant.pizzas
+        ]
+        restaurant_data = {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "address": restaurant.address,
+            "pizzas": pizzas
+        }
+        return jsonify(restaurant_data)
+    else:
+        return jsonify({"error": "Restaurant not found"}), 404
+
 
 if __name__ == '__main__':
     app.run(port=5555)
