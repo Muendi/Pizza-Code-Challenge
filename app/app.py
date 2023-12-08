@@ -69,6 +69,53 @@ def delete_restaurant(id):
         return jsonify({"error": "Restaurant not found"}), 404
 
 # Get all pizzas
+@app.route('/pizzas', methods=['GET'])
+def get_pizzas():
+    pizzas = Pizza.query.all()
+    formatted_pizzas = [
+        {
+            "id": pizza.id,
+            "name": pizza.name,
+            "ingredients": pizza.ingredients
+        }
+        for pizza in pizzas
+    ]
+    return jsonify(formatted_pizzas)
+
+# Route to create a new RestaurantPizza
+@app.route('/restaurant_pizzas', methods=['POST'])
+def create_restaurant_pizza():
+    data = request.json
+    pizza_id = data.get('pizza_id')
+    restaurant_id = data.get('restaurant_id')
+    price = data.get('price')
+
+    if not (pizza_id and restaurant_id and price):
+        return jsonify({"errors": ["Please provide pizza_id, restaurant_id, and price"]}), 400
+# Check if both Pizza and Restaurant exist
+    pizza = Pizza.query.get(pizza_id)
+    restaurant = Restaurant.query.get(restaurant_id)
+
+    if not (pizza and restaurant):
+        return jsonify({"errors": ["Pizza or Restaurant not found"]}), 404
+
+    # Create RestaurantPizza
+    try:
+        new_restaurant_pizza = RestaurantPizza(
+            pizza_id=pizza_id,
+            restaurant_id=restaurant_id,
+            price=price
+        )
+        db.session.add(new_restaurant_pizza)
+        db.session.commit()
+        return jsonify({
+            "id": pizza.id,
+            "name": pizza.name,
+            "ingredients": pizza.ingredients
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"errors": [str(e)]}), 500
 
 if __name__ == '__main__':
     app.run(port=5555)
